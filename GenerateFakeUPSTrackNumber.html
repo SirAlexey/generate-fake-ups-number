@@ -1,0 +1,101 @@
+<html>
+    <head title="UPS fake track number generator">
+        <meta name="description" content="UPS fake track number generator">
+        <meta name="author" content="Aleksei Sirotkin">
+        <meta name="source" content="https://www.codeproject.com/Articles/21224/Calculating-the-UPS-Tracking-Number-Check-Digit">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript">
+        //
+        // UPS Check Digit Calculation Method
+        //
+        function CalculateCheckDigit(chars)
+        {
+            var checkdigit = 0;
+            var charindex = 1;
+            var runningtotal = 0;
+            for (var c = 0; c < chars.length; c++)
+            
+            {
+                ch = chars[c];  
+                if((charindex % 2) == 0) //Indicates character in even position
+                {
+                    if( Number.isInteger(ch) == true)
+                    // Indicates numeric value
+                    {
+                        let testeven = 1 * ch;
+                        runningtotal += (2 * testeven);
+                    }
+                    else // Indicates alpha value
+                    {
+                        let asciivalue = ch.charCodeAt(0);
+                        let n = asciivalue - 48;
+                        runningtotal += n;
+                    }
+                }
+                else // Indicates character in odd position
+                {
+                    if( Number.isInteger(ch) == true)
+                    // Indicates numeric value
+                    {
+                        let testodd = 1 * ch;
+                        runningtotal += testodd;
+                    }
+                    else // Indicates alpha value
+                    {
+                        let asciivalue = ch.charCodeAt(0);
+                        let n = asciivalue - 48;
+                        let x = ((2 * n) - (9 * Math.floor(n / 5)));
+                        runningtotal += x;
+                    }
+                }
+                charindex++;
+            }
+            let x = (runningtotal % 10);
+            if(x == 0) checkdigit = x;
+            else if(x > 0) checkdigit = (10 - x);
+            return checkdigit;
+        }
+        
+        function random_string(cnt) {
+            var r = "";
+            for (var i = 0; i< cnt; i++) {
+                r = r + Math.floor(Math.random() * 10);
+            }
+            return r;
+        }
+        
+        function GenerateUPSNumber() {
+            let UPS_ACCOUNT_NUMBER = random_string(6);
+            let SERVICE_TYPE = "03";
+            /*
+            "01" for Next Day Air shipments.
+            "02" for Second Day Air shipments.
+            "03" for Ground shipments.
+            */
+            let INVOICE_NUMBER = random_string(5);
+            let PACKAGE_NUMBER = random_string(2);
+            var trk = UPS_ACCOUNT_NUMBER + SERVICE_TYPE + INVOICE_NUMBER + PACKAGE_NUMBER;
+            let CHECKSUM = CalculateCheckDigit(trk) ;
+            trk = "1Z" + trk + CHECKSUM;
+            return trk;
+        }
+
+        function init() {
+            let d = document.getElementById("content");
+            d.innerText = "";
+            //Generate 10 fake track numbers
+            for (var i = 0; i < 10; i++) {
+                let nd = document.createElement('div');
+                nd.innerText = GenerateUPSNumber();
+                d.appendChild(nd);
+            }
+        }
+        </script>
+    </head>
+
+    <body onload="init()">
+        <div id="content">
+        </div>
+        <input type="button" onclick="init()" value="MORE !!!"/>
+    </body>
+</html>
